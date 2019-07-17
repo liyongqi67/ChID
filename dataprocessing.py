@@ -83,10 +83,11 @@ with open("D://BaiduNetdiskDownload//open_data//train.txt", 'r',encoding='utf8')
         for s in line["candidates"]:
             idioms.append(idiom2id[s])
 
-        doc=[]
-        loc=[]
-        label=[]
+
         for num in range(len(line["content"])):
+            doc = []
+            loc = []
+            label = []
             content = re.split(r'(#idiom\d+#)', line["content"][num])
             for s in content:
                 if(s==""):
@@ -100,8 +101,8 @@ with open("D://BaiduNetdiskDownload//open_data//train.txt", 'r',encoding='utf8')
                             doc.append(word2id[each])
                         else:
                             doc.append(word2id["<UNK>"])
-        for s in loc:
-            train.append((idioms,doc,s,label))  #[([idioms],[doc],)]
+            for num in range(len(loc)):
+                train.append((idioms,doc,loc[num],label[num]))  #[([idioms],[doc],)]
 
 dev=[]
 with open("D://BaiduNetdiskDownload//open_data//dev.txt", 'r',encoding='utf8') as f:
@@ -112,10 +113,11 @@ with open("D://BaiduNetdiskDownload//open_data//dev.txt", 'r',encoding='utf8') a
         for s in line["candidates"]:
             idioms.append(idiom2id[s])
 
-        doc=[]
-        loc=[]
-        label=[]
+
         for num in range(len(line["content"])):
+            doc = []
+            loc = []
+            label = []
             content = re.split(r'(#idiom\d+#)', line["content"][num])
             for s in content:
                 if(s==""):
@@ -129,8 +131,8 @@ with open("D://BaiduNetdiskDownload//open_data//dev.txt", 'r',encoding='utf8') a
                             doc.append(word2id[each])
                         else:
                             doc.append(word2id["<UNK>"])
-        for s in loc:
-            dev.append((idioms,doc,s,label))
+            for s in loc:
+                dev.append((idioms,doc,s,label))
 with open("D://BaiduNetdiskDownload//open_data//dataset.pkl", 'wb') as f:
     pickle.dump(train, f)
     pickle.dump(dev, f)
