@@ -131,8 +131,8 @@ with open("D://BaiduNetdiskDownload//open_data//dev.txt", 'r',encoding='utf8') a
                             doc.append(word2id[each])
                         else:
                             doc.append(word2id["<UNK>"])
-            for s in loc:
-                dev.append((idioms,doc,s,label))
+            for num in range(len(loc)):
+                dev.append((idioms,doc,loc[num],label[num]))  #[([idioms],[doc],)]
 with open("D://BaiduNetdiskDownload//open_data//dataset.pkl", 'wb') as f:
     pickle.dump(train, f)
     pickle.dump(dev, f)
