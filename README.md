@@ -15,3 +15,11 @@ You will obtain the new 2id.pkl and dataset.pkl, dataset.pkl contains of train a
 run python3 LSTM based Model/train.py<br/>
 start to train the model on dataset.pkl, and the parameters will be saved in model_save folder<br/>
 
+run ptthon3 LSTM based Model/getAnswer.py<br/>
+will obtain the submission.csv
+
+## Results
+
+| Models            | Dev      | Test | Out  |
+| ---------         | -------- | ---- | ---- |
+| LSTM based Model  | 30.22033 | -    | -    |
