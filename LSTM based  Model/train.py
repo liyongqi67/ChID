@@ -16,6 +16,7 @@ import sklearn.metrics
 # ==================================================
 import sys
 
+import csv
 import pickle
 
 #data file
@@ -33,50 +34,66 @@ lr=0.001
 
 settings = network.Settings()
 idiom_num=10
-doc_len=100
+doc_len=300 #avg_len=104
 train_batchSize=256
 val_batchsize=256
 idiom_size=3848
 word_size=585893
 # Load data
 print("Loading data...")
-
-with open("/home/share/liyongqi/ChID/2id.pkl", 'rb') as f:
-    idiom2id = pickle.load(f)
-    word2id = pickle.load(f)
-print(len(idiom2id))
-print(len(word2id))
+with open("/home/share/liyongqi/ChID/word_embedding.pkl", 'rb') as f:
+  word_embedding= pickle.load(f)
+  idiom_embedding= pickle.load(f)
 
 with open("/home/share/liyongqi/ChID/dataset.pkl", 'rb') as f:
   train_data= pickle.load(f)
   dev_data= pickle.load(f)
-print('train_data len:',len(train_data))
-print(train_data[0])
+
+random.seed(10)
 random.shuffle(train_data)
-val_data=train_data[:int(0.1*len(train_data))]
-train_data=train_data[int(0.1*len(train_data)):]
+val_data=train_data[:10000]
+train_data=train_data[10000:]
 
 def getBatch(batchSize,num,data):
         
-        idiom_input=np.zeros([batchSize,idiom_num],dtype=np.int)
-        doc_input=np.zeros([batchSize,doc_len],dtype=np.int)
-        loc_input=np.zeros([batchSize,1],dtype=np.int)
-        label_input=np.zeros([batchSize,idiom_num],dtype=np.int)
-        sequence_len_input=np.zeros([batchSize],dtype=np.int)
+        if((num+1)*batchSize>len(data)):
+          temp_batchsize=len(data)-num*batchSize
+          idiom_input=np.zeros([temp_batchsize,idiom_num],dtype=np.int)
+          doc_input=np.zeros([temp_batchsize,doc_len],dtype=np.int)
+          loc_input=np.zeros([temp_batchsize,1],dtype=np.int)
+          label_input=np.zeros([temp_batchsize,idiom_num],dtype=np.int)
+          sequence_len_input=np.zeros([temp_batchsize],dtype=np.int)
 
-        for i in range(num*batchSize,(num+1)*batchSize):
-            idiom_input[i%batchSize]=data[i][0]
-            loc_input[i%batchSize]=data[i][2]
-            label_input[i%batchSize,data[i][3]]=1
+          for i in range(num*batchSize,len(data)):
+              idiom_input[i%temp_batchsize]=data[i][0]
+              loc_input[i%temp_batchsize]=data[i][2]
+              label_input[i%temp_batchsize,data[i][3]]=1
 
-            if(len(data[i][1])>doc_len):
-                doc_input[i%batchSize]=data[i][1][:doc_len]
-                sequence_len_input[i%batchSize]=doc_len
-            else:
-                doc_input[i%batchSize]=data[i][1]+[0]*(doc_len-len(data[i][1]))
-                sequence_len_input[i%batchSize]=len(data[i][1])
+              if(len(data[i][1])>doc_len):
+                  doc_input[i%temp_batchsize]=data[i][1][:doc_len]
+                  sequence_len_input[i%temp_batchsize]=doc_len
+              else:
+                  doc_input[i%temp_batchsize]=data[i][1]+[0]*(doc_len-len(data[i][1]))
+                  sequence_len_input[i%temp_batchsize]=len(data[i][1])  
+        else:
+        
+          idiom_input=np.zeros([batchSize,idiom_num],dtype=np.int)
+          doc_input=np.zeros([batchSize,doc_len],dtype=np.int)
+          loc_input=np.zeros([batchSize,1],dtype=np.int)
+          label_input=np.zeros([batchSize,idiom_num],dtype=np.int)
+          sequence_len_input=np.zeros([batchSize],dtype=np.int)
 
+          for i in range(num*batchSize,(num+1)*batchSize):
+              idiom_input[i%batchSize]=data[i][0]
+              loc_input[i%batchSize]=data[i][2]
+              label_input[i%batchSize,data[i][3]]=1
 
+              if(len(data[i][1])>doc_len):
+                  doc_input[i%batchSize]=data[i][1][:doc_len]
+                  sequence_len_input[i%batchSize]=doc_len
+              else:
+                  doc_input[i%batchSize]=data[i][1]+[0]*(doc_len-len(data[i][1]))
+                  sequence_len_input[i%batchSize]=len(data[i][1]) 
 
         return idiom_input,doc_input,loc_input,label_input,sequence_len_input
         
@@ -97,7 +114,7 @@ def eva(sess,model):
                            model.loc_inputs: loc_input, 
                            model.label_inputs: label_input, 
                            model.sequence_len_inputs:sequence_len_input,
-                           model.tst: False, 
+                           model.tst: True, 
                            model.keep_prob: 1.0})
             y_pred=np.argmax(y_pred,1)
             label_input=np.argmax(label_input,1)
@@ -112,14 +129,13 @@ config = tf.ConfigProto()
 #config.gpu_options.allow_growth = True 
 sess = tf.InteractiveSession(config=config)
 
-word_embedding=np.random.rand(word_size, 200)
-idiom_embedding=np.random.rand(idiom_size, 128)
+
 
 model = network.Lstm(word_embedding,idiom_embedding,settings)
 
 
 
-train_op=tf.train.AdamOptimizer(0.005).minimize(model.loss,global_step=model.global_step)
+train_op=tf.train.AdamOptimizer(0.001).minimize(model.loss,global_step=model.global_step)
 update_op = tf.group(*model.update_emas)
 
 sess.run(tf.global_variables_initializer())
@@ -149,7 +165,7 @@ with open(time+".txt", "a") as f:
                            model.label_inputs: label_input, 
                            model.sequence_len_inputs:sequence_len_input,
                            model.tst: False, 
-                           model.keep_prob: 1.0})
+                           model.keep_prob: 0.5})
 
             if num%100==1:
                 y_pred=np.argmax(y_pred,1)

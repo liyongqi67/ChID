@@ -11,10 +11,10 @@ from tensorflow.python.ops.rnn_cell import MultiRNNCell
 class Settings(object):
     def __init__(self):
         self.model_name = 'lstm'
-        self.doc_len = 100
+        self.doc_len =  300
         self.batch_size=256
         self.idiom_num=10
-        self.hidden_size=64
+        self.hidden_size=100
 
 
 class Lstm(object):
@@ -46,19 +46,20 @@ class Lstm(object):
         with tf.name_scope('Embedding_layer'):
             self.idiom=tf.nn.embedding_lookup(self.idiom_embedding, self.idiom_inputs) #batchsize*idiom_num*embedding_size
             self.doc=tf.nn.embedding_lookup(self.word_embedding, self.doc_inputs) #batchsize*doc_len*embedding_size
+            self.doc=tf.nn.dropout(self.doc, self.keep_prob)
 
         with tf.variable_scope('LSTM_layer'):
             self.doc=self.lstm_inference(self.doc,self.sequence_len_inputs) # [batchsize, doc_len, 2 * hidden_size]
-            self.loc=tf.concat([tf.reshape(tf.range(self.batch_size),[-1,1]),tf.reshape(self.loc_inputs,[-1,1])],1)     # B 2
+            self.doc=tf.nn.dropout(self.doc, self.keep_prob)
+            self.loc=tf.concat([tf.reshape(tf.range(tf.shape(self.loc_inputs)[0]),[-1,1]),tf.reshape(self.loc_inputs,[-1,1])],1)     # B 2
             self.doc=tf.gather_nd(self.doc,self.loc) # [batchsize, 2 * hidden_size]
             self.doc=tf.reshape(self.doc,[-1,1,2*self.hidden_size])
         with tf.variable_scope('Out_layer'):
             match_matrix = tf.matmul(self.doc, tf.transpose(self.idiom, [0, 2, 1]))  # [batchsize, 1, idiom_num]
             self.output = tf.nn.softmax(tf.reshape(match_matrix,[-1,self.idiom_num]))
         with tf.name_scope('loss'):
-            l2_norm = tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables() if 'w' in v.name])
             self.loss = tf.reduce_mean(
-                tf.nn.softmax_cross_entropy_with_logits(logits=self.output, labels=self.label_inputs))+l2_norm * 0.00005
+               tf.nn.softmax_cross_entropy_with_logits(logits=self.output, labels=self.label_inputs))
 
 
 

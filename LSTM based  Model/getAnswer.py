@@ -34,7 +34,7 @@ lr=0.001
 
 settings = network.Settings()
 idiom_num=10
-doc_len=100
+doc_len=300
 dev_batchSize=256
 
 idiom_size=3848
@@ -42,13 +42,14 @@ word_size=585893
 # Load data
 print("Loading data...")
 
-
+with open("/home/share/liyongqi/ChID/word_embedding.pkl", 'rb') as f:
+  word_embedding= pickle.load(f)
+  idiom_embedding= pickle.load(f)
 
 with open("/home/share/liyongqi/ChID/dataset.pkl", 'rb') as f:
   train_data= pickle.load(f)
   dev_data= pickle.load(f)
 print(len(dev_data))
-print(train_data[1])
 
 
 
@@ -100,19 +101,17 @@ def getBatch(batchSize,num,data):
 
 
 # Placeholders for input, output and dropout
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 config = tf.ConfigProto()
 #config.gpu_options.allow_growth = True 
 sess = tf.InteractiveSession(config=config)
 
-word_embedding=np.random.rand(word_size, 200)
-idiom_embedding=np.random.rand(idiom_size, 128)
 
 model = network.Lstm(word_embedding,idiom_embedding,settings)
 
 
 
-train_op=tf.train.AdamOptimizer(0.005).minimize(model.loss,global_step=model.global_step)
+train_op=tf.train.AdamOptimizer(0.001).minimize(model.loss,global_step=model.global_step)
 update_op = tf.group(*model.update_emas)
 
 sess.run(tf.global_variables_initializer())
