@@ -30,5 +30,5 @@ change "flags.DEFINE_boolean("is_train", False, "training or testing a model")" 
 
 | Models            | Dev      | Test | Out  |
 | ---------         | -------- | ---- | ---- |
-| LSTM based Model  | 30.22033 | -    | -    |
+| LSTM based Model  | 55.32136 | -    | -    |
 | AR Model          | 65.35570 | -    | -    |
