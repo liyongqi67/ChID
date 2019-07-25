@@ -46,3 +46,4 @@ will obtain the submission.csv
 | LSTM based Model  | 64.75598 | -    | -    |
 | AR Model          | 65.35570 | -    | -    |
 | Interaction based | 53.660757| -    | -    |
+| NCF based Model   |  63.78253| -    | -    |
