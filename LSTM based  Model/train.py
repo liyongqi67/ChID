@@ -121,7 +121,32 @@ def eva(sess,model):
     acc=sklearn.metrics.accuracy_score(y_true,y_pred)
     return acc
 
+def test(sess,model):
+    total_count=len(dev_data)/val_batchsize
+    total_count=int(total_count)+1
+    
+    submission=[]
+    for num in tqdm(range(total_count)):
+        
+        idiom_input,doc_input,loc_input,label_input,sequence_len_input,blank_keys=getBatch(val_batchsize,num,dev_data)
+        loss,y_out =sess.run([model.loss,model.pred],
+          feed_dict = {
+                       model.idiom_inputs: idiom_input, 
+                       model.doc_inputs: doc_input,  
+                       model.loc_inputs: loc_input, 
+                       model.label_inputs: label_input, 
+                       model.sequence_len_inputs:sequence_len_input,
+                       model.tst: True, 
+                       model.keep_prob: 1.0})
+        y_out=list(y_out)
+        for i in range(len(blank_keys)):
+          submission.append((blank_keys[i],y_out[i]))
 
+
+    with open("submission.csv","w",newline="", encoding="utf-8-sig") as f:
+        csv_write = csv.writer(f)
+        for s in submission:
+          csv_write.writerow(s)
 
 # Placeholders for input, output and dropout
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -135,19 +160,19 @@ model = network.Lstm(word_embedding,idiom_embedding,settings)
 
 
 
-train_op=tf.train.AdamOptimizer(0.001).minimize(model.loss,global_step=model.global_step)
+train_op=tf.train.AdamOptimizer(0.0001).minimize(model.loss,global_step=model.global_step)
 update_op = tf.group(*model.update_emas)
 
 sess.run(tf.global_variables_initializer())
 
 saver = tf.train.Saver()
 
-#saver.restore(sess,  "./model_save/model.ckpt")
-
+saver.restore(sess,  "./model_save/model.ckpt")
+#test(sess,model)
 
 with open(time+".txt", "a") as f:
-#    acc=eva(sess,model)
-    best_score=0
+    best_score=eva(sess,model)
+    print(best_score)
     for epoch in range(10000000):
         total_count=len(train_data)/train_batchSize
         total_count=int(total_count)+1
@@ -176,8 +201,10 @@ with open(time+".txt", "a") as f:
                     if(acc>best_score):
                         save_path = saver.save(sess, "./model_save/model.ckpt")
                         best_score=acc
+                        test(sess,model)
                     print('epoch:',epoch,'acc on val:',acc,'best_score',best_score)
                     f.write('epoch:'+str(epoch)+' acc on val:'+str(acc)+' best_score:'+str(best_score)+"\n" )
                     f.flush() 
+                  
 sess.close()
 
