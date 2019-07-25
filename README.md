@@ -32,7 +32,12 @@ run python3 train.py<br/>
 start to train the model on dataset.pkl, and the parameters will be saved in model_save folder<br/>
 will obtain the submission.csv
 
-
+### 4 NCF based Model<br/>
+run python3 dataprocessing.py<br/>
+run python3 getw2v.py<br/>
+run python3 train.py<br/>
+start to train the model on dataset.pkl, and the parameters will be saved in model_save folder<br/>
+will obtain the submission.csv
 
 ## Results
 
