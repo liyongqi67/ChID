@@ -39,6 +39,9 @@ run python3 train.py<br/>
 start to train the model on dataset.pkl, and the parameters will be saved in model_save folder<br/>
 will obtain the submission.csv
 
+### 5 Bert based Model<br/>
+run run.sh
+
 ## Results
 
 | Models            | Dev      | Test | Out  |
@@ -47,3 +50,4 @@ will obtain the submission.csv
 | AR Model          | 65.355707| -    | -    |
 | Interaction based | 55.099735| -    | -    |
 | NCF based Model   | 63.782538| -    | -    |
+| Bert based Model  | 73.495286| -    | -    |
