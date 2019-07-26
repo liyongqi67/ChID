@@ -43,7 +43,7 @@ will obtain the submission.csv
 
 | Models            | Dev      | Test | Out  |
 | ---------         | -------- | ---- | ---- |
-| LSTM based Model  | 64.75598 | -    | -    |
-| AR Model          | 65.35570 | -    | -    |
+| LSTM based Model  | 64.960236| -    | -    |
+| AR Model          | 65.355707| -    | -    |
 | Interaction based | 53.660757| -    | -    |
 | NCF based Model   | 63.782538| -    | -    |
