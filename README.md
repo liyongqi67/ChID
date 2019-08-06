@@ -50,4 +50,4 @@ run run.sh
 | AR Model          | 65.355707| -    | -    |
 | Interaction based | 55.099735| -    | -    |
 | NCF based Model   | 63.782538| -    | -    |
-| Bert based Model  | 73.495286| -    | -    |
+| Bert based Model  | 74.516535| -    | -    |
